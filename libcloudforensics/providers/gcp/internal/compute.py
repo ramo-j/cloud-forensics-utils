@@ -2284,7 +2284,7 @@ class GoogleComputeImage(compute_base_resource.GoogleComputeBaseResource):
       full_path = '{0:s}.tar.gz'.format(full_path)
     else:
       full_path = '{0:s}.{1:s}'.format(full_path, image_format)
-			
+
     build_args = [
         '-source_image={0:s}'.format(self.name),
         '-destination_uri={0:s}'.format(full_path),
