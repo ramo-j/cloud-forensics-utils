@@ -113,6 +113,21 @@ def CreateDiskCopy(args: 'argparse.Namespace') -> None:
   logger.info('Name: {0:s}'.format(disk.name))
 
 
+def CopyDiskToGCS(args):
+  """Make a copy of a GCE disk into GCS storage.
+
+  Args:
+    args (argparse.Namespace): Arguments from ArgumentParser.
+  """
+  gcs_path = forensics.CopyDisksToGCS(source_project=args.project,
+                                      source_disk=args.disk_name,
+                                      destination_bucket=args.bucket,
+                                      destination_directory=args.directory,
+                                      image_format=args.image_format)
+  logger.info('Disk copy completed.')
+  logger.info('Location: {0:s}'.format(gcs_path))
+
+
 def DeleteInstance(args: 'argparse.Namespace') -> None:
   """Deletes a GCE instance.
 
@@ -540,6 +555,7 @@ def GKEWorkloadQuarantine(args: 'argparse.Namespace') -> None:
   forensics.QuarantineGKEWorkload(args.project, args.location, args.cluster,
                                   args.namespace, args.workload,
                                   exempted_src_ips=exempted_src_ips)
+
 
 def GKEEnumerate(args: 'argparse.Namespace') -> None:
   """Enumerate GKE cluster objects.

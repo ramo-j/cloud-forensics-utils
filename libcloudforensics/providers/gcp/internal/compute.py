@@ -2253,39 +2253,49 @@ class GoogleComputeImage(compute_base_resource.GoogleComputeBaseResource):
     return response
 
   def ExportImage(
-      self, gcs_output_folder: str, output_name: Optional[str] = None) -> None:
-    """Export compute image to Google Cloud storage.
-
+      self,
+      gcs_output_folder: str,
+      image_format: str,
+      output_name: Optional[str]) -> str:
+    """Export compute image to Google Cloud Storage.
+    
     Exported image is compressed and stored in .tar.gz format.
 
     Args:
       gcs_output_folder (str): Folder path of the exported image.
+      image_format (str): The image format to use for the export.
       output_name (str): Optional. Name of the output file. Name will be
           appended with .tar.gz. Default is [image_name].tar.gz.
-
+    Returns:
+      str: The full path of the exported image.
     Raises:
       InvalidNameError: If exported image name is invalid.
     """
-
     if output_name:
       if not common.REGEX_DISK_NAME.match(output_name):
         raise errors.InvalidNameError(
             'Exported image name {0:s} does not comply with {1:s}'.format(
                 output_name, common.REGEX_DISK_NAME.pattern),
             __name__)
-      full_path = '{0:s}.tar.gz'.format(
-          os.path.join(gcs_output_folder, output_name))
+      full_path = '{0:s}'.format(os.path.join(gcs_output_folder, output_name))
     else:
-      full_path = '{0:s}.tar.gz'.format(
-          os.path.join(gcs_output_folder, self.name))
+      full_path = '{0:s}'.format(os.path.join(gcs_output_folder, self.name))
+    if not image_format:
+      full_path = '{0:s}.tar.gz'.format(full_path)
+    else:
+      full_path = '{0:s}.{1:s}'.format(full_path, image_format)
+			
+    build_args = [
+        '-source_image={0:s}'.format(self.name),
+        '-destination_uri={0:s}'.format(full_path),
+        '-client_id=api',
+    ]
+    if image_format:
+      build_args.append('-format={0:s}'.format(image_format))
     build_body = {
         'timeout': '86400s',
-        'steps': [{
-            'args': [
-                '-source_image={0:s}'.format(self.name),
-                '-destination_uri={0:s}'.format(full_path),
-                '-client_id=api',
-            ],
+        'steps': [{		
+            'args': build_args,
             'name': 'gcr.io/compute-image-tools/gce_vm_image_export:release',
             'env': []
         }],
@@ -2295,6 +2305,7 @@ class GoogleComputeImage(compute_base_resource.GoogleComputeBaseResource):
     response = cloud_build.CreateBuild(build_body)
     cloud_build.BlockOperation(response)
     logger.info('Image {0:s} exported to {1:s}.'.format(self.name, full_path))
+    return full_path
 
   def Delete(self) -> None:
     """Delete Compute Disk Image from a project."""

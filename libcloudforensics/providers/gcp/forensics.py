@@ -252,6 +252,50 @@ def CreateDiskFromGCSImage(
   return result
 
 
+def CopyDisksToGCS(source_project: str,
+                   source_disk: str,
+                   destination_bucket: str,
+                   destination_directory: str,
+                   image_format: str) -> str:
+  """Given a VM, copy the disks to a GCS bucket.
+
+  Args:
+    source_project: The project containing the disk to copy
+    source_disk: The name of the disk to copy
+    destination_bucket: The destination bucket to store the disk copy
+    destination_directory: The directory in the bucket in which to store the
+        disk image
+    image_format: The image format to use. Supported formats documented at
+        https://github.com/GoogleCloudPlatform/compute-image-import/blob/edee48bddbe159100da9ad961131a4beb0f12158/cli_tools/gce_vm_image_export/README.md?plain=1#L3
+  """
+  try:
+    src_project = gcp_project.GoogleCloudProject(source_project)
+    disk_to_copy = src_project.compute.GetDisk(source_disk)
+    copied_image = src_project.compute.CreateImageFromDisk(disk_to_copy)
+    return copied_image.ExportImage(
+      gcs_output_folder=f'gs://{destination_bucket}/{destination_directory}',
+      image_format=image_format,
+      output_name=disk_to_copy.name)
+  except (RefreshError, DefaultCredentialsError) as exception:
+    raise errors.CredentialsConfigurationError(
+        'Something is wrong with your Application Default Credentials. Try '
+        'running: $ gcloud auth application-default login: {0!s}'.format(
+            exception),
+        __name__) from exception
+  except HttpError as exception:
+    if exception.resp.status == 403:
+      raise errors.CredentialsConfigurationError(
+          'Make sure you have the appropriate permissions on the project: '
+          '{0!s}'.format(exception),
+          __name__) from exception
+    if exception.resp.status == 404:
+      raise errors.ResourceNotFoundError(
+          'GCP resource not found. Maybe a typo in the project / instance / '
+          'disk name?',
+          __name__) from exception
+    raise RuntimeError(exception) from exception
+
+
 def AddDenyAllFirewallRules(
     project_id: str,
     network: str,

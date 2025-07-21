@@ -52,6 +52,7 @@ PROVIDER_TO_FUNC = {
         'bucketacls': gcp_cli.GetBucketACLs,
         'bucketsize': gcp_cli.GetBucketSize,
         'copydisk': gcp_cli.CreateDiskCopy,
+        'copydisktogcs': gcp_cli.CopyDiskToGCS,
         'creatediskgcs': gcp_cli.CreateDiskFromGCSImage,
         'deleteinstance': gcp_cli.DeleteInstance,
         'deleteobject': gcp_cli.DeleteObject,
@@ -387,6 +388,16 @@ def Main() -> None:
                                 'The default behavior is to use the same disk '
                                 'type as the source disk.', None)
             ])
+  AddParser('gcp', gcp_subparsers, 'copydisktogcs',
+            'Copy a disk content into GCS.',
+            args=[
+                ('project', 'Source GCP project containing the disk to copy',
+                 ''),
+                ('disk_name', 'Name of the disk to copy.', ''),
+                ('bucket', 'Name of the destination bucket.', ''),
+                ('directory', 'Destination directory path in the GCS bucket.',
+                 ''),
+                ('image_format', 'Image format.', '')])
   AddParser('gcp', gcp_subparsers, 'startvm', 'Start a forensic analysis VM.',
             args=[
                 ('instance_name', 'Name of the GCE instance to create.',
