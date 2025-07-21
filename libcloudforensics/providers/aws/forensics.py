@@ -113,9 +113,6 @@ def CreateVolumeCopy(zone: str,
         account information could not be retrieved.
   """
 
-  if not instance_id and not volume_id:
-    raise ValueError(
-        'You must specify at least one of [instance_id, volume_id].')
 
   source_account = account.AWSAccount(zone, aws_profile=src_profile)
   destination_account = account.AWSAccount(zone, aws_profile=dst_profile)
@@ -124,9 +121,13 @@ def CreateVolumeCopy(zone: str,
   try:
     if volume_id:
       volume_to_copy = source_account.ebs.GetVolumeById(volume_id)
-    else:
+    elif instance_id:
       instance = source_account.ec2.GetInstanceById(instance_id)
       volume_to_copy = instance.GetBootVolume()
+    else:
+      raise ValueError(
+          'You must specify at least one of [instance_id, volume_id].')
+
 
     if not volume_type:
       volume_type = volume_to_copy.GetVolumeType()

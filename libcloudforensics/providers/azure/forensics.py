@@ -72,10 +72,6 @@ def CreateDiskCopy(
     ValueError: If both instance_name and disk_name are missing.
   """
 
-  if not instance_name and not disk_name:
-    raise ValueError(
-        'You must specify at least one of [instance_name, disk_name].')
-
   src_account = account.AZAccount(
       resource_group_name, default_region=region, profile_name=src_profile)
   dst_account = account.AZAccount(resource_group_name,
@@ -85,9 +81,13 @@ def CreateDiskCopy(
   try:
     if disk_name:
       disk_to_copy = src_account.compute.GetDisk(disk_name)
-    else:
+    elif instance_name:
       instance = src_account.compute.GetInstance(instance_name)
       disk_to_copy = instance.GetBootDisk()
+    else:
+      raise ValueError(
+          'You must specify at least one of [instance_name, disk_name].')
+
     logger.info('Disk copy of {0:s} started...'.format(
         disk_to_copy.name))
 

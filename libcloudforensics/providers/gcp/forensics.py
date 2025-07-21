@@ -68,19 +68,18 @@ def CreateDiskCopy(
     ValueError: If both instance_name and disk_name are missing.
   """
 
-  if not instance_name and not disk_name:
-    raise ValueError(
-        'You must specify at least one of [instance_name, disk_name].')
-
   src_project = gcp_project.GoogleCloudProject(src_proj)
   dst_project = gcp_project.GoogleCloudProject(dst_proj, default_zone=zone)
 
   try:
     if disk_name:
       disk_to_copy = src_project.compute.GetDisk(disk_name)
-    else:
+    elif instance_name:
       instance = src_project.compute.GetInstance(instance_name)
       disk_to_copy = instance.GetBootDisk()
+    else:
+      raise ValueError(
+          'You must specify at least one of [instance_name, disk_name].')
 
     if not disk_type:
       disk_type = disk_to_copy.GetDiskType()

@@ -113,7 +113,7 @@ def CreateDiskCopy(args: 'argparse.Namespace') -> None:
   logger.info('Name: {0:s}'.format(disk.name))
 
 
-def CopyDiskToGCS(args):
+def CopyDiskToGCS(args: 'argparse.Namespace') -> None:
   """Make a copy of a GCE disk into GCS storage.
 
   Args:
