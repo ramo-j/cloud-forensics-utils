@@ -124,7 +124,7 @@ def CreateVolumeCopy(zone: str,
   try:
     if volume_id:
       volume_to_copy = source_account.ebs.GetVolumeById(volume_id)
-    elif instance_id:
+    else:
       instance = source_account.ec2.GetInstanceById(instance_id)
       volume_to_copy = instance.GetBootVolume()
 
@@ -200,8 +200,7 @@ def CreateVolumeCopy(zone: str,
 
   return new_volume
 
-# pylint: disable=too-many-arguments
-def StartAnalysisVm(
+def StartAnalysisVm(  # pylint: disable=too-many-arguments,too-many-positional-arguments
     vm_name: str,
     default_availability_zone: str,
     boot_volume_size: int,

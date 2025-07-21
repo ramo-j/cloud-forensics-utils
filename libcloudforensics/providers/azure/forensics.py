@@ -85,7 +85,7 @@ def CreateDiskCopy(
   try:
     if disk_name:
       disk_to_copy = src_account.compute.GetDisk(disk_name)
-    elif instance_name:
+    else:
       instance = src_account.compute.GetInstance(instance_name)
       disk_to_copy = instance.GetBootDisk()
     logger.info('Disk copy of {0:s} started...'.format(

@@ -78,7 +78,7 @@ def CreateDiskCopy(
   try:
     if disk_name:
       disk_to_copy = src_project.compute.GetDisk(disk_name)
-    elif instance_name:
+    else:
       instance = src_project.compute.GetInstance(instance_name)
       disk_to_copy = instance.GetBootDisk()
 
@@ -713,19 +713,13 @@ def TriageInstance(project_id: str, instance_name: str) -> Dict[str, Any]:
 
   cpu_usage = project.monitoring.GetCpuUsage(
       instance_ids=[instance_info['id']], aggregation_minutes=1)
-  if cpu_usage:
-    parsed_cpu = cpu_usage[0].get('cpu_usage', [])
+  parsed_cpu = cpu_usage[0].get('cpu_usage', []) if cpu_usage else None
 
 
   gce_gpu_usage = project.monitoring.GetInstanceGPUUsage(
-    instance_ids=[instance_info['id']])
-  if gce_gpu_usage:
-    parsed_gce_gpu = gce_gpu_usage
-
+      instance_ids=[instance_info['id']])
 
   gke_gpu_usage = project.monitoring.GetNodeAccelUsage()
-  if gke_gpu_usage:
-    parsed_gke_gpu = gke_gpu_usage
 
   instance_triage = {
       'instance_info': {
@@ -741,25 +735,25 @@ def TriageInstance(project_id: str, instance_name: str) -> Dict[str, Any]:
           'data_type': 'service_accounts',
           'values': instance_info['serviceAccounts']
       },
-                      {
-                          'data_type': 'firewalls',
-                          'values': instance.GetNormalisedFirewalls()
-                      }, {
-                          'data_type': 'cpu_usage', 'values': parsed_cpu
-                      }, {
-                          'data_type': 'gce_gpu_usage', 'values': parsed_gce_gpu
-                      }, {
-                          'data_type': 'gke_gpu_usage', 'values': parsed_gke_gpu
-                      }, {
-                          'data_type':
-                              'ssh_auth',
-                          'values':
-                              CheckInstanceSSHAuth(
-                                  project_id, instance_info['name'])
-                      }, {
-                          'data_type': 'active_services',
-                          'values': parsed_services
-                      }]
+      {
+          'data_type': 'firewalls',
+          'values': instance.GetNormalisedFirewalls()
+      }, {
+          'data_type': 'cpu_usage', 'values': parsed_cpu
+      }, {
+          'data_type': 'gce_gpu_usage', 'values': gce_gpu_usage
+      }, {
+          'data_type': 'gke_gpu_usage', 'values': gke_gpu_usage
+      }, {
+          'data_type':
+              'ssh_auth',
+          'values':
+              CheckInstanceSSHAuth(
+                  project_id, instance_info['name'])
+      }, {
+          'data_type': 'active_services',
+          'values': parsed_services
+      }]
   }
 
   return instance_triage

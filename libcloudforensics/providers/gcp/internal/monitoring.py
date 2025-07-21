@@ -333,6 +333,7 @@ class GoogleCloudMonitoring:
     for response in responses:
       time_series = response.get('timeSeries', [])
       for ts in time_series:
+        gpu_name = 'None'
         if ts['metric'].get('labels', None):
           gpu_name = "{0:s} ({1:s})".format(
               ts['metric']['labels']['model'],

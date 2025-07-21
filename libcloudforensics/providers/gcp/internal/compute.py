@@ -682,7 +682,7 @@ class GoogleCloudCompute(common.GoogleCloudComputeClient):
     return GoogleComputeInstance(
         project_id=self.project_id, zone=compute_zone, name=instance_name)
 
-  def CreateInstanceFromArguments(  #pylint: disable=too-many-arguments
+  def CreateInstanceFromArguments(  # pylint: disable=too-many-arguments,too-many-positional-arguments
       self,
       instance_name: str,
       machine_type: str,
@@ -1288,6 +1288,7 @@ class GoogleCloudCompute(common.GoogleCloudComputeClient):
         'windows-8-x86-byol'
     ]
 
+    img_type = None
     if not bootable:
       img_type = '-data_disk'
     elif not os_name:

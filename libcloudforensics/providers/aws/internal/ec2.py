@@ -372,8 +372,7 @@ class EC2:
 
     return images['Images']
 
-  # pylint: disable=too-many-arguments
-  def GetOrCreateVm(
+  def GetOrCreateVm(  # pylint: disable=too-many-arguments,too-many-positional-arguments
       self,
       vm_name: str,
       boot_volume_size: int,
