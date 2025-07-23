@@ -272,9 +272,9 @@ def CopyDisksToGCS(source_project: str,
     disk_to_copy = src_project.compute.GetDisk(source_disk)
     copied_image = src_project.compute.CreateImageFromDisk(disk_to_copy)
     return copied_image.ExportImage(
-      gcs_output_folder=f'gs://{destination_bucket}/{destination_directory}',
-      image_format=image_format,
-      output_name=disk_to_copy.name)
+        gcs_output_folder=f'gs://{destination_bucket}/{destination_directory}',
+        image_format=image_format,
+        output_name=disk_to_copy.name)
   except (RefreshError, DefaultCredentialsError) as exception:
     raise errors.CredentialsConfigurationError(
         'Something is wrong with your Application Default Credentials. Try '

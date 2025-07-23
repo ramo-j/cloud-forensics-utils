@@ -153,3 +153,28 @@ class GCPForensicsTest(unittest.TestCase):
         'fake_project' , 'fake_instance')
     self.assertListEqual(
         ssh_auth, ['publickey', 'password', 'keyboard-interactive'])
+
+  @mock.patch('libcloudforensics.providers.gcp.internal.project.GoogleCloudProject')
+  def testCopyDisksToGCS(self, mock_project: mock.MagicMock):
+    """Tests copying a disk to GCS storage."""
+
+    dest_bucket_name = gcp_mocks.MOCK_GCS_BUCKETS['items'][0].get('name')
+
+    forensics.CopyDisksToGCS(gcp_mocks.FAKE_SOURCE_PROJECT.project_id,
+                             gcp_mocks.FAKE_DISK.name,
+                             dest_bucket_name,
+                             '/path/to/directory/',
+                             'qcow2')
+    
+    mock_project.assert_called_once_with(gcp_mocks.FAKE_SOURCE_PROJECT.project_id)
+    mock_project.return_value.compute.GetDisk.assert_called_once_with(gcp_mocks.FAKE_DISK.name)
+
+    mock_disk_obj = mock_project.return_value.compute.GetDisk.return_value
+    mock_project.return_value.compute.CreateImageFromDisk.assert_called_once_with(mock_disk_obj)
+
+    mock_image_obj = mock_project.return_value.compute.CreateImageFromDisk.return_value
+    mock_image_obj.ExportImage.assert_called_once_with(
+        gcs_output_folder=f'gs://{dest_bucket_name}/{"/path/to/directory/"}',
+        image_format='qcow2',
+        output_name=mock_disk_obj.name)
+  
