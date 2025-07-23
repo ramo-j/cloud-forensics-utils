@@ -165,7 +165,7 @@ class GCPForensicsTest(unittest.TestCase):
                              dest_bucket_name,
                              '/path/to/directory/',
                              'qcow2')
-    
+
     mock_project.assert_called_once_with(gcp_mocks.FAKE_SOURCE_PROJECT.project_id)
     mock_project.return_value.compute.GetDisk.assert_called_once_with(gcp_mocks.FAKE_DISK.name)
 
