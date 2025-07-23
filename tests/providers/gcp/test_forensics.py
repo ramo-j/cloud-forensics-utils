@@ -155,10 +155,10 @@ class GCPForensicsTest(unittest.TestCase):
         ssh_auth, ['publickey', 'password', 'keyboard-interactive'])
 
   @mock.patch('libcloudforensics.providers.gcp.internal.project.GoogleCloudProject')
-  def testCopyDisksToGCS(self, mock_project: mock.MagicMock):
+  def testCopyDisksToGCS(self, mock_project: mock.MagicMock) -> None:
     """Tests copying a disk to GCS storage."""
 
-    dest_bucket_name = gcp_mocks.MOCK_GCS_BUCKETS['items'][0].get('name')
+    dest_bucket_name = gcp_mocks.MOCK_GCS_BUCKETS['items'][0].get('name')  # type: ignore
 
     forensics.CopyDisksToGCS(gcp_mocks.FAKE_SOURCE_PROJECT.project_id,
                              gcp_mocks.FAKE_DISK.name,
